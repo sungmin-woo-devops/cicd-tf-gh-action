@@ -1,0 +1,28 @@
+# Terraform 상태 파일 (버전 관리에서 제외해야 함)
+**/terraform.tfstate
+**/terraform.tfstate.backup
+
+# Terraform 실행 중 생성되는 충돌 로그 파일
+**/crash.log
+
+# Terraform 계획(plan) 파일 (임시 파일이므로 제외)
+**/*.tfplan
+
+# .terraform 폴더 (다운로드된 모듈 및 플러그인 포함)
+**/.terraform/
+**/.terraform.lock.hcl
+
+# 보안상 민감한 SSH 키 및 인증 파일 제외
+**/*.pem
+**/*.key
+**/id_rsa*
+**/id_dsa*
+
+# 환경 변수 파일 (보안 및 환경 설정 파일 제외)
+**/.env
+**/.envrc
+
+# 로그 및 임시 파일
+**/*.log
+**/*.tmp
+
