@@ -161,9 +161,10 @@ data "aws_ami" "amazon_linux_2023" {
   }
 }
 
+variable "aws_key_pair_public_key" {}
 resource "aws_key_pair" "MyKeyPair" {
   key_name = "MyKeyPair"
-  public_key = file("~/.ssh/id_rsa.pub")
+  public_key = var.aws_key_pair_public_key
 }
 
 resource "aws_instance" "MyPubEC2_1" {
