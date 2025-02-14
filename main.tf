@@ -32,8 +32,86 @@ resource "aws_subnet" "MyPubSN_1" {
   }
 }
 
+resource "aws_subnet" "MyPubSN_2" {
+  vpc_id = aws_vpc.MyVPC.id
+  cidr_block = var.pub_subnet_cidr_blocks[1]
+  availability_zone = var.azs[1]
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "MyPubSN_2"
+  }
+}
+
+resource "aws_subnet" "MyPrivSN_APP_1" {
+  vpc_id = aws_vpc.MyVPC.id
+  cidr_block = var.priv_subnet_cidr_blocks[0]
+  availability_zone = var.azs[0]
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "MyPrivSN_1"
+  }
+}
+
+resource "aws_subnet" "MyPrivSN_APP_2" {
+  vpc_id = aws_vpc.MyVPC.id
+  cidr_block = var.priv_subnet_cidr_blocks[1]
+  availability_zone = var.azs[1]
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "MyPrivSN_2"
+  }
+}
+
+resource "aws_subnet" "MyPrivSN_DB_1" {
+  vpc_id = aws_vpc.MyVPC.id
+  cidr_block = var.priv_subnet_cidr_blocks[2]
+  availability_zone = var.azs[2]
+  map_public_ip_on_launch = false
+}
+
+resource "aws_subnet" "MyPrivSN_DB_2" {
+  vpc_id = aws_vpc.MyVPC.id
+  cidr_block = var.priv_subnet_cidr_blocks[3]
+  availability_zone = var.azs[3]
+  map_public_ip_on_launch = false
+}
+
 resource "aws_route_table" "MyPubRT" {
   vpc_id = aws_vpc.MyVPC.id
+
+  tags = {
+    Name = "MyPubRT"
+  }
+}
+
+resource "aws_route_table" "MyPrivRT" {
+  vpc_id = aws_vpc.MyVPC.id
+
+  tags = {
+    Name = "MyPrivRT"
+  }
+}
+
+resource "aws_eip" "lb" {
+  domain   = "vpc"
+
+  tags = {
+    Name = "MyNAT_EIP"
+  }
+}
+
+resource "aws_nat_gateway" "MyNAT" {
+  allocation_id = aws_eip.lb.id
+  subnet_id = aws_subnet.MyPubSN_1.id
+
+  tags = {
+    Name = "MyNAT"
+  }
+
+  depends_on = [aws_internet_gateway.MyIGW]
 }
 
 resource "aws_route_table_association" "MyPubRTAssoc" {
@@ -73,7 +151,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all" {
   ip_protocol       = "-1"
 }
 
-data "aws_ami" "example" {
+data "aws_ami" "amazon_linux_2023" {
   most_recent      = true
   owners           = ["137112412989"]
 
@@ -89,7 +167,7 @@ resource "aws_key_pair" "MyKeyPair" {
 }
 
 resource "aws_instance" "MyPubEC2_1" {
-  ami           = data.aws_ami.example.id
+  ami           = data.aws_ami.amazon_linux_2023.id
   instance_type = "t2.micro"
   subnet_id = aws_subnet.MyPubSN_1.id
   vpc_security_group_ids = [aws_security_group.MySG_22_80.id]
